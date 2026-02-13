@@ -1,0 +1,11 @@
+{
+    "name": "docnear",
+    "version": "1.0.0",
+    "description": "Premium Doctor Appointment Booking System",
+    "scripts": {
+        "start": "serve ."
+    },
+    "dependencies": {
+        "serve": "^14.2.0"
+    }
+}
