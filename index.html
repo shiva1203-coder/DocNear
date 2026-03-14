@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocNear – Find & Book Doctors Near You</title>
+  <meta name="description"
+    content="DocNear is your trusted platform for discovering doctors near you, booking appointments instantly, and managing your healthcare journey.">
+  <meta name="keywords" content="doctor appointment, book doctor, find doctor, healthcare, allopathy, homeopathy">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🩺</text></svg>">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+  <!-- Animated Background -->
+  <div class="bg-mesh">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+  </div>
+
+  <!-- ─── Navigation ─── -->
+  <nav class="navbar" id="navbar">
+    <div class="glass">
+      <div class="navbar-inner">
+        <a href="#" class="navbar-logo" onclick="navigateTo('home')">
+          <i class="fa-solid fa-heart-pulse"></i> DocNear
+        </a>
+        <div class="nav-links" id="navLinks">
+          <button class="nav-link active" data-page="home" onclick="navigateTo('home')">Home</button>
+          <button class="nav-link" data-page="about" onclick="navigateTo('about')">About Us</button>
+          <button class="nav-link" data-page="emergency" onclick="navigateTo('emergency')">Emergency</button>
+          <button class="nav-link" data-page="privacy" onclick="navigateTo('privacy')">Privacy</button>
+          <button class="nav-link-admin" data-page="admin" onclick="navigateTo('admin')">
+            <i class="fa-solid fa-lock"></i> Admin
+          </button>
+        </div>
+        <button class="mobile-toggle" id="mobileToggle" onclick="toggleMobileMenu()">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+      <div class="mobile-menu glass" id="mobileMenu">
+        <button class="nav-link active" data-page="home" onclick="navigateTo('home');toggleMobileMenu()">Home</button>
+        <button class="nav-link" data-page="about" onclick="navigateTo('about');toggleMobileMenu()">About Us</button>
+        <button class="nav-link" data-page="emergency"
+          onclick="navigateTo('emergency');toggleMobileMenu()">Emergency</button>
+        <button class="nav-link" data-page="privacy" onclick="navigateTo('privacy');toggleMobileMenu()">Privacy</button>
+        <button class="nav-link-admin" data-page="admin" onclick="navigateTo('admin');toggleMobileMenu()">
+          <i class="fa-solid fa-lock"></i> Admin
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══════════ MAIN CONTENT (HOME) ═══════════ -->
+  <main class="main-content" id="mainContent">
+
+    <!-- ─── Hero Section ─── -->
+    <section class="hero" id="hero-section">
+      <div class="hero-content fade-in">
+        <div class="hero-badge"><span class="dot"></span> Trusted by 10,000+ patients</div>
+        <h1>Find Your <span class="gradient-text">Perfect Doctor</span> Near You</h1>
+        <p>Book appointments with top-rated doctors in your area. Fast, secure, and hassle-free healthcare at your
+          fingertips.</p>
+        <div class="search-box glass">
+          <input type="text" id="heroSearch" placeholder="Search by doctor name or specialty..."
+            onkeyup="handleSearch(event)">
+          <button class="btn-primary" onclick="executeSearch()"><i class="fa-solid fa-magnifying-glass"></i>
+            Search</button>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <h3>200+</h3>
+            <p>Verified Doctors</p>
+          </div>
+          <div class="stat-item">
+            <h3>50+</h3>
+            <p>Specialties</p>
+          </div>
+          <div class="stat-item">
+            <h3>10K+</h3>
+            <p>Appointments</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Specialist Categories ─── -->
+    <section class="page-section" id="categories-section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Browse Specialties</h2>
+          <p>Find the right specialist for your needs from our wide range of medical categories</p>
+        </div>
+        <div class="categories-grid" id="categoriesGrid"></div>
+      </div>
+    </section>
+
+    <!-- ─── Medical Branches + Doctor Listings ─── -->
+    <section class="page-section" id="doctors-section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Our Doctors</h2>
+          <p>Experienced professionals ready to provide you with the best care</p>
+        </div>
+        <div class="branch-toggle-wrap">
+          <div class="branch-toggle glass">
+            <button class="branch-btn active" id="branchAll" onclick="filterBranch('all')">All</button>
+            <button class="branch-btn" id="branchAllopathy" onclick="filterBranch('allopathy')">Allopathy</button>
+            <button class="branch-btn" id="branchAyurveda" onclick="filterBranch('ayurveda')">Ayurveda</button>
+            <button class="branch-btn" id="branchHomeopathy" onclick="filterBranch('homeopathy')">Homeopathy</button>
+            <button class="branch-btn" id="branchSiddha" onclick="filterBranch('siddha')">Siddha</button>
+            <button class="branch-btn" id="branchUnani" onclick="filterBranch('unani')">Unani</button>
+            <button class="branch-btn" id="branchNaturopathy" onclick="filterBranch('naturopathy')">Naturopathy</button>
+          </div>
+        </div>
+        <div class="doctors-grid" id="doctorsGrid"></div>
+      </div>
+    </section>
+
+    <!-- ─── Map Section ─── -->
+    <section class="page-section" id="map-section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Find Doctors on Map</h2>
+          <p>Locate doctors near you and see how far they are from your current location</p>
+        </div>
+        <div class="map-wrapper glass-card" style="padding:0;">
+          <div id="map-container"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Pharmacy Coming Soon ─── -->
+    <section class="page-section pharmacy-section" id="pharmacy-section">
+      <div class="container">
+        <div class="pharmacy-inner">
+          <div class="pharmacy-icon">💊</div>
+          <h2>Pharmacy Store</h2>
+          <div class="coming-soon-badge">Coming Soon</div>
+          <p>We're building an online pharmacy to deliver medicines right to your doorstep. Stay tuned for the launch!
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════ BOOKING MODAL ═══════════ -->
+  <div class="modal-overlay" id="bookingModal">
+    <div class="modal glass">
+      <div class="modal-header">
+        <h3>Book Appointment</h3>
+        <button class="modal-close" onclick="closeBookingModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="bookingContent">
+        <div class="modal-doctor-info" id="modalDoctorInfo"></div>
+        <div class="form-group">
+          <label>Select Date</label>
+          <input type="date" class="form-control" id="bookingDate" onchange="loadTimeSlots()">
+        </div>
+        <div class="form-group">
+          <label>Available Time Slots</label>
+          <div class="time-slots" id="timeSlots">
+            <p style="color:var(--text-muted);font-size:0.85rem;">Select a date first</p>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Patient Name</label>
+          <input type="text" class="form-control" id="patientName" placeholder="Enter your full name">
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" class="form-control" id="patientPhone" placeholder="+91 XXXXX XXXXX">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" class="form-control" id="patientEmail" placeholder="your@email.com">
+        </div>
+        <button class="btn-primary btn-confirm" onclick="confirmBooking()"><i class="fa-solid fa-check"></i> Confirm
+          Booking</button>
+      </div>
+      <div id="bookingSuccess" class="booking-success" style="display:none;">
+        <i class="fa-solid fa-circle-check"></i>
+        <h3>Booking Confirmed!</h3>
+        <p id="successMsg"></p>
+        <button class="btn-primary" style="margin-top:20px;" onclick="closeBookingModal()">Done</button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- ═══════════ JOIN MODAL ═══════════ -->
+  <div class="modal-overlay" id="joinModal">
+    <div class="modal glass" style="max-width:600px;">
+      <div class="modal-header">
+        <h3>Join DocNear Network</h3>
+        <button class="modal-close" onclick="closeJoinModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="joinContent">
+        <p style="margin-bottom:20px;color:var(--text-secondary);">Fill in your details to request to join our network.
+          Your profile will be reviewed by an admin.</p>
+        <div class="form-group"><label>Full Name (Dr.)</label><input type="text" class="form-control" id="joinName"
+            placeholder="Dr. John Doe"></div>
+        <div class="form-group"><label>Specialty</label><select class="form-control" id="joinSpecialty">
+            <option value="" disabled selected>Select Specialty</option>
+            <option value="all">All</option>
+            <option value="cardiology">Cardiology</option>
+            <option value="dermatology">Dermatology</option>
+            <option value="pediatrics">Pediatrics</option>
+            <option value="orthopedics">Orthopedics</option>
+            <option value="neurology">Neurology</option>
+            <option value="ophthalmology">Ophthalmology</option>
+            <option value="ent">ENT</option>
+            <option value="general">General Medicine</option>
+            <option value="dentistry">Dentistry</option>
+            <option value="gynecology">Gynecology</option>
+            <option value="psychiatry">Psychiatry</option>
+            <option value="gastroenterology">Gastroenterology</option>
+          </select></div>
+        <div class="form-group"><label>Branch</label><select class="form-control" id="joinBranch">
+            <option value="allopathy">Allopathy</option>
+            <option value="ayurveda">Ayurveda</option>
+            <option value="homeopathy">Homeopathy</option>
+            <option value="siddha">Siddha</option>
+            <option value="unani">Unani</option>
+            <option value="naturopathy">Naturopathy</option>
+          </select></div>
+        <div class="form-group"><label>Experience (Years)</label><input type="number" class="form-control" id="joinExp"
+            placeholder="e.g. 10"></div>
+        <div class="form-group"><label>Consultation Fee (₹)</label><input type="number" class="form-control"
+            id="joinFee" placeholder="e.g. 500"></div>
+        <div class="form-group"><label>Phone</label><input type="tel" class="form-control" id="joinPhone"
+            placeholder="+91 XXXXX XXXXX"></div>
+        <div class="form-group"><label>Email</label><input type="email" class="form-control" id="joinEmail"
+            placeholder="doctor@example.com"></div>
+        <div class="form-group full-width"><label>Clinic Address</label><input type="text" class="form-control"
+            id="joinAddress" placeholder="Full address"></div>
+        <div class="form-group full-width">
+          <label>Medical Registration Certificate (PDF/JPG)</label>
+          <input type="file" class="form-control" id="joinCert" accept=".pdf, .jpg, .jpeg, .png">
+          <p style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Max size: 2MB</p>
+        </div>
+        <div class="form-group full-width"><label>About You</label><textarea class="form-control" id="joinAbout"
+            rows="3" placeholder="Brief professional summary..."></textarea></div>
+        <button class="btn-primary" style="width:100%;justify-content:center;margin-top:16px;"
+          onclick="submitJoinRequest()">
+          <i class="fa-solid fa-paper-plane"></i> Submit Request
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ ABOUT PAGE ═══════════ -->
+  <div class="info-page" id="aboutPage">
+    <div class="container info-content fade-in">
+      <div class="glass-card">
+        <h1>About DocNear</h1>
+        <p>DocNear is a modern healthcare platform designed to bridge the gap between patients and quality medical
+          professionals. Our mission is to make healthcare accessible, transparent, and convenient for everyone.</p>
+        <h3>Our Vision</h3>
+        <p>To become the most trusted digital bridge between patients and doctors, ensuring that quality healthcare is
+          just a click away for every individual.</p>
+        <h3>What We Offer</h3>
+        <ul>
+          <li>Search and discover verified doctors across multiple specialties</li>
+          <li>Real-time appointment booking with instant confirmation</li>
+          <li>Support for both Allopathy and Homeopathy branches</li>
+          <li>Interactive map view to find doctors near your location</li>
+          <li>Transparent doctor profiles with ratings and reviews</li>
+        </ul>
+        <h3>Our Team</h3>
+        <p>We are a dedicated team of healthcare enthusiasts, technologists, and designers committed to transforming how
+          people access medical care. Founded in 2024, DocNear has grown to serve thousands of patients across the
+          country.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ EMERGENCY PAGE ═══════════ -->
+  <div class="info-page" id="emergencyPage">
+    <div class="container info-content fade-in">
+      <div class="glass-card">
+        <h1>Emergency Contacts</h1>
+        <p>In case of a medical emergency, please contact the following numbers immediately:</p>
+      </div>
+      <div class="emergency-card glass-card">
+        <div class="e-icon" style="background:rgba(255,107,157,0.15);color:var(--accent-pink);"><i
+            class="fa-solid fa-truck-medical"></i></div>
+        <div>
+          <h4>Ambulance Service</h4>
+          <p>108</p>
+        </div>
+      </div>
+      <div class="emergency-card glass-card">
+        <div class="e-icon" style="background:rgba(0,210,255,0.15);color:var(--accent-cyan);"><i
+            class="fa-solid fa-phone"></i></div>
+        <div>
+          <h4>National Emergency Number</h4>
+          <p>112</p>
+        </div>
+      </div>
+      <div class="emergency-card glass-card">
+        <div class="e-icon" style="background:rgba(52,211,153,0.15);color:var(--accent-green);"><i
+            class="fa-solid fa-hospital"></i></div>
+        <div>
+          <h4>Poison Control</h4>
+          <p>1800-11-6117</p>
+        </div>
+      </div>
+      <div class="emergency-card glass-card">
+        <div class="e-icon" style="background:rgba(251,191,36,0.15);color:#fbbf24;"><i
+            class="fa-solid fa-shield-heart"></i></div>
+        <div>
+          <h4>Mental Health Helpline</h4>
+          <p>1800-599-0019</p>
+        </div>
+      </div>
+      <div class="emergency-card glass-card">
+        <div class="e-icon" style="background:rgba(167,139,250,0.15);color:#a78bfa;"><i class="fa-solid fa-child"></i>
+        </div>
+        <div>
+          <h4>Child Helpline</h4>
+          <p>1098</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ PRIVACY PAGE ═══════════ -->
+  <div class="info-page" id="privacyPage">
+    <div class="container info-content fade-in">
+      <div class="glass-card">
+        <h1>Privacy Policy</h1>
+        <p><strong>Last Updated:</strong> February 2026</p>
+        <h3>Information We Collect</h3>
+        <p>We collect information you provide when booking appointments, including your name, contact details, and
+          health preferences. We also collect usage data to improve our services.</p>
+        <h3>How We Use Your Information</h3>
+        <ul>
+          <li>To process and manage your appointment bookings</li>
+          <li>To communicate appointment confirmations and reminders</li>
+          <li>To improve our platform and user experience</li>
+          <li>To ensure the security of your account</li>
+        </ul>
+        <h3>Data Protection</h3>
+        <p>Your data is encrypted and stored securely. We do not sell or share your personal information with third
+          parties without your consent. All medical data is handled in compliance with applicable healthcare data
+          regulations.</p>
+        <h3>Your Rights</h3>
+        <p>You have the right to access, modify, or delete your personal data at any time. Contact us at <span
+            style="color:var(--accent-cyan);">privacy@docnear.com</span> for data-related requests.</p>
+        <h3>Contact</h3>
+        <p>For privacy concerns, email us at <span style="color:var(--accent-cyan);">privacy@docnear.com</span> or call
+          <span style="color:var(--accent-cyan);">1800-DOC-NEAR</span>.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ ADMIN PAGE ═══════════ -->
+  <div class="admin-page" id="adminPage">
+    <div class="container fade-in">
+      <!-- Admin Login -->
+      <div class="admin-login" id="adminLogin">
+        <div class="glass-card">
+          <i class="fa-solid fa-user-shield" style="font-size:2.5rem;color:var(--accent-cyan);margin-bottom:16px;"></i>
+          <h2>Admin Panel</h2>
+          <p>Enter your credentials to access the dashboard</p>
+          <div class="form-group"><label>Username</label><input type="text" class="form-control" id="adminUser"
+              placeholder="Enter username"></div>
+          <div class="form-group"><label>Password</label><input type="password" class="form-control" id="adminPass"
+              placeholder="••••••••" onkeyup="if(event.key==='Enter')adminLoginAction()"></div>
+          <button class="btn-primary" style="width:100%;justify-content:center;" onclick="adminLoginAction()"><i
+              class="fa-solid fa-right-to-bracket"></i> Login</button>
+        </div>
+      </div>
+      <!-- Admin Dashboard -->
+      <div class="admin-dashboard" id="adminDashboard">
+        <div
+          style="display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;flex-wrap:wrap;gap:16px;">
+          <h2
+            style="background:var(--gradient-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+            Admin Dashboard</h2>
+          <button class="btn-logout" onclick="adminLogout()"><i class="fa-solid fa-right-from-bracket"></i>
+            Logout</button>
+        </div>
+        <div class="admin-stats" id="adminStats"></div>
+        <div class="admin-tabs">
+          <button class="admin-tab active" onclick="switchAdminTab('doctors',this)">Manage Doctors</button>
+          <button class="admin-tab" onclick="switchAdminTab('bookings',this)">Manage Bookings</button>
+          <button class="admin-tab" onclick="switchAdminTab('requests',this)">Requests <span id="reqBadge"
+              class="badge-count"></span></button>
+          <button class="admin-tab" onclick="switchAdminTab('addDoctor',this)">Add Doctor</button>
+        </div>
+        <div class="glass-card" style="padding:24px;">
+          <div id="adminTabContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ FOOTER ═══════════ -->
+  <footer class="footer" id="footer">
+    <div class="container">
+      <p>&copy; 2026 DocNear. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#" onclick="navigateTo('about')">About</a>
+        <a href="#" onclick="navigateTo('emergency')">Emergency</a>
+        <a href="#" onclick="navigateTo('privacy')">Privacy</a>
+        <a href="#" onclick="navigateTo('admin')">Admin</a>
+        <a href="#" onclick="openJoinModal()" style="color:var(--accent-cyan);">Join as Doctor</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>
